@@ -22,8 +22,14 @@ public class ClubsHolder {
                 .put("Печатники", "pechatniki")
                 .put("Пражская", "prazhskaya")
                 .put("Сходненская", "skhodnenskaya").build();
+    }
 
+    public String[] clubsString(){
+        return clubs.keySet().toArray(new String[clubs.size()]);
+    }
 
+    public String getClub(String clubString){
+        return clubs.get(clubString);
     }
 
 }

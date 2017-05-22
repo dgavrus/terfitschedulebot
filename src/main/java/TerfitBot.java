@@ -1,4 +1,9 @@
 import com.sun.xml.internal.ws.util.StringUtils;
+import data.ClubsHolder;
+import data.HtmlParser;
+import data.users.Remember;
+import data.users.UserProperties;
+import data.users.UsersHolder;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -10,15 +15,23 @@ import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TerfitBot extends TelegramLongPollingBot{
 
-    public static void main(String[] args) {
+    private static UsersHolder usersHolder;
+    private static ClubsHolder clubsHolder;
+
+    public static void main(String[] args) throws IOException {
         ApiContextInitializer.init();
 
         TelegramBotsApi botsApi = new TelegramBotsApi();
+        usersHolder = new UsersHolder();
+        clubsHolder = new ClubsHolder();
 
         try {
             botsApi.registerBot(new TerfitBot());
@@ -28,21 +41,63 @@ public class TerfitBot extends TelegramLongPollingBot{
     }
 
     public void onUpdateReceived(Update update) {
-        Message message = update.getMessage();
-        String text = message.getText().toLowerCase();
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(message.getChatId());
-        if(!text.equalsIgnoreCase("лох") && !text.equalsIgnoreCase("пидр")){
-            ReplyKeyboardMarkup rkm = new ReplyKeyboardMarkup();
-            rkm.setKeyboard(Arrays.stream(new String[]{"Лох", "Пидр"}).map(s -> {
-                KeyboardRow keyboardRow = new KeyboardRow();
-                keyboardRow.add(new KeyboardButton(s));
-                return keyboardRow;
-            }).collect(Collectors.toList()));
-            sendMessage.setReplyMarkup(rkm);
-            sendMessage.setText("Лох или пидр?");
+        Integer id = update.getMessage().getFrom().getId();
+        UserProperties userProperties;
+        if(usersHolder.hasUserProperties(id)){
+            userProperties = usersHolder.getUserProperties(id);
         } else {
-            sendMessage.setText(StringUtils.capitalize(text));
+            userProperties = new UserProperties();
+            usersHolder.putUserProperties(id, userProperties);
+        }
+        Message message = update.getMessage();
+        String text = message.getText();
+        int state = userProperties.getState();
+
+        SendMessage sendMessage = new SendMessage();
+
+        sendMessage.setChatId(message.getChatId());
+        ReplyKeyboardMarkup rkm = new ReplyKeyboardMarkup();
+
+        switch (state){
+            case 0:
+            case 1:
+                sendMessage.setReplyMarkup(rkm);
+                rkm.setKeyboard(Arrays.stream(clubsHolder.clubsString())
+                        .map(s -> {
+                            KeyboardRow keyboardRow = new KeyboardRow();
+                            keyboardRow.add(new KeyboardButton(s));
+                            return keyboardRow;
+                        }).collect(Collectors.toList()));
+                sendMessage.setText("Выберите клуб:");
+                userProperties.setState(userProperties.getRemember() != Remember.YES ? 2 : 3);
+                break;
+            case 2:
+                userProperties.setClub(text);
+                sendMessage.setReplyMarkup(rkm);
+                rkm.setKeyboard(Arrays.stream(Remember.values())
+                        .map(s -> {
+                            KeyboardRow keyboardRow = new KeyboardRow();
+                            keyboardRow.add(new KeyboardButton(s.getString()));
+                            return keyboardRow;
+                        }).collect(Collectors.toList()));
+                sendMessage.setText("Запомнить выбор?");
+                userProperties.incState();
+                break;
+            case 3:
+                sendMessage.setReplyMarkup(rkm);
+                rkm.setKeyboard(Collections.singletonList(new KeyboardRow() {{
+                    add(new KeyboardButton("Сегодня"));
+                }}));
+                sendMessage.setText("Выберите день или занятие:");
+                userProperties.incState();
+                break;
+            case 4:
+                HtmlParser parser = new HtmlParser(clubsHolder.getClub(userProperties.getClub()));
+                try {
+                    sendMessage.setText(parser.loadPage());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
         }
         try {
             sendMessage(sendMessage);

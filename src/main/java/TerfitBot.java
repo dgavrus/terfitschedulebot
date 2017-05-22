@@ -69,7 +69,7 @@ public class TerfitBot extends TelegramLongPollingBot{
                             return keyboardRow;
                         }).collect(Collectors.toList()));
                 sendMessage.setText("Выберите клуб:");
-                userProperties.setState(userProperties.getRemember() != Remember.YES ? 2 : 3);
+                userProperties.setState(userProperties.getRemember() != Remember.YES ? 2 : 4);
                 break;
             case 2:
                 userProperties.setClub(text);
@@ -84,6 +84,12 @@ public class TerfitBot extends TelegramLongPollingBot{
                 userProperties.incState();
                 break;
             case 3:
+                userProperties.setRemember(Arrays.stream(Remember.values())
+                        .filter(r -> r.getString().equals(text))
+                        .findFirst()
+                        .orElse(Remember.NOT_NOW));
+                userProperties.incState();
+            case 4:
                 sendMessage.setReplyMarkup(rkm);
                 rkm.setKeyboard(Collections.singletonList(new KeyboardRow() {{
                     add(new KeyboardButton("Сегодня"));
@@ -91,7 +97,7 @@ public class TerfitBot extends TelegramLongPollingBot{
                 sendMessage.setText("Выберите день или занятие:");
                 userProperties.incState();
                 break;
-            case 4:
+            case 5:
                 HtmlParser parser = new HtmlParser(clubsHolder.getClub(userProperties.getClub()));
                 try {
                     sendMessage.setText(parser.loadPage());

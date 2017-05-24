@@ -66,6 +66,8 @@ public class TerfitBot extends TelegramLongPollingBot{
 
         sendMessage.setChatId(message.getChatId());
         ReplyKeyboardMarkup rkm = new ReplyKeyboardMarkup();
+        rkm.setResizeKeyboard(true);
+        rkm.setOneTimeKeyboard(true);
 
         switch (state){
             case 0:
@@ -149,7 +151,7 @@ public class TerfitBot extends TelegramLongPollingBot{
                                         }})
                         );
                         sendMessage.setReplyMarkup(rkm);
-                        sendMessage.setText("Выберите дйствие:");
+                        sendMessage.setText("Выберите действие:");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

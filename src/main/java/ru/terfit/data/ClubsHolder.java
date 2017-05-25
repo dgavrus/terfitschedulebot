@@ -1,9 +1,11 @@
-package data;
+package ru.terfit.data;
 
 import com.google.common.collect.ImmutableMap;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public class ClubsHolder {
 
     private final Map<String, String> clubs;

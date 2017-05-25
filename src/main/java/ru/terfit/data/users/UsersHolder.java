@@ -1,14 +1,13 @@
-package data.users;
+package ru.terfit.data.users;
+
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
 public class UsersHolder {
 
-    private ConcurrentHashMap<Integer, UserProperties> users;
-
-    public UsersHolder(){
-        this.users = new ConcurrentHashMap<>();
-    }
+    private ConcurrentHashMap<Integer, UserProperties> users = new ConcurrentHashMap<>();
 
     public UserProperties getUserProperties(Integer id){
         return users.get(id);

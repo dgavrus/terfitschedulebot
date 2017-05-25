@@ -1,16 +1,14 @@
-package data;
+package ru.terfit.data;
 
-import com.google.common.collect.ImmutableList;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class HtmlParser {
@@ -30,6 +28,9 @@ public class HtmlParser {
         Elements day = body.getElementsByClass("scp-day");
         Collection<Element> dayString = day.get(0).select(".scp-tile").stream().collect(Collectors.toList());
         Collection<Event> events = dayString.stream().map(this::parseEvent).collect(Collectors.toList());
+        events = events.stream()
+                .filter(ev -> LocalTime.parse(ev.getTime().split("" + (char)8212)[0].trim()).isAfter(LocalTime.now()))
+                .collect(Collectors.toList());
         return events;
     }
 

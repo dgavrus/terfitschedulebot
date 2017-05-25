@@ -1,49 +1,39 @@
-import com.google.common.collect.ImmutableCollection;
+package ru.terfit;
+
 import com.google.common.collect.ImmutableList;
-import com.sun.org.apache.regexp.internal.RE;
-import data.ClubsHolder;
-import data.Event;
-import data.HtmlParser;
-import data.users.Remember;
-import data.users.UserProperties;
-import data.users.UsersHolder;
-import org.telegram.telegrambots.ApiContextInitializer;
-import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
+import org.springframework.stereotype.Component;
+import ru.terfit.data.ClubsHolder;
+import ru.terfit.data.Constants;
+import ru.terfit.data.Event;
+import ru.terfit.data.HtmlParser;
+import ru.terfit.data.users.Keyboards;
+import ru.terfit.data.users.Remember;
+import ru.terfit.data.users.UserProperties;
+import ru.terfit.data.users.UsersHolder;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
-import org.telegram.telegrambots.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
+import javax.inject.Inject;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class TerfitBot extends TelegramLongPollingBot{
+import static ru.terfit.data.Constants.*;
+import static ru.terfit.data.users.Keyboards.*;
 
-    private static UsersHolder usersHolder;
-    private static ClubsHolder clubsHolder;
-    private static Map<String, Integer> keyWords;
 
-    public static void main(String[] args) throws IOException {
-        ApiContextInitializer.init();
+@Component
+public class TerfitBot extends TelegramLongPollingBot {
 
-        TelegramBotsApi botsApi = new TelegramBotsApi();
-        usersHolder = new UsersHolder();
-        clubsHolder = new ClubsHolder();
-
-        try {
-            botsApi.registerBot(new TerfitBot());
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
-    }
+    @Inject
+    private UsersHolder usersHolder;
+    @Inject
+    private ClubsHolder clubsHolder;
+    @Inject
+    private Keyboards keyboards;
 
     public void onUpdateReceived(Update update) {
         Integer id = update.getMessage().getFrom().getId();
@@ -56,7 +46,7 @@ public class TerfitBot extends TelegramLongPollingBot{
         }
         Message message = update.getMessage();
         String text = message.getText();
-        if(text.equals("Сменить клуб")){
+        if(text.equals(CHANGE_CLUB)){
             userProperties.setState(1);
             userProperties.setRemember(Remember.NOT_NOW);
         }
@@ -72,25 +62,13 @@ public class TerfitBot extends TelegramLongPollingBot{
         switch (state){
             case 0:
             case 1:
-                sendMessage.setReplyMarkup(rkm);
-                rkm.setKeyboard(Arrays.stream(clubsHolder.clubsString())
-                        .map(s -> {
-                            KeyboardRow keyboardRow = new KeyboardRow();
-                            keyboardRow.add(new KeyboardButton(s));
-                            return keyboardRow;
-                        }).collect(Collectors.toList()));
+                sendMessage.setReplyMarkup(keyboards.get(CLUBS));
                 sendMessage.setText("Выберите клуб:");
                 userProperties.setState(userProperties.getRemember() != Remember.YES ? 2 : 4);
                 break;
             case 2:
                 userProperties.setClub(text);
-                sendMessage.setReplyMarkup(rkm);
-                rkm.setKeyboard(Arrays.stream(Remember.values())
-                        .map(s -> {
-                            KeyboardRow keyboardRow = new KeyboardRow();
-                            keyboardRow.add(new KeyboardButton(s.getString()));
-                            return keyboardRow;
-                        }).collect(Collectors.toList()));
+                sendMessage.setReplyMarkup(keyboards.get(REMEMBER));
                 sendMessage.setText("Запомнить выбор?");
                 userProperties.incState();
                 break;
@@ -101,11 +79,7 @@ public class TerfitBot extends TelegramLongPollingBot{
                         .orElse(Remember.NOT_NOW));
                 userProperties.incState();
             case 4:
-                sendMessage.setReplyMarkup(rkm);
-                rkm.setKeyboard(Collections.singletonList(new KeyboardRow() {{
-                    add(new KeyboardButton("Сегодня"));
-                    add(new KeyboardButton("Завтра"));
-                }}));
+                sendMessage.setReplyMarkup(keyboards.get(DAYS_CLASSES));
                 sendMessage.setText("Выберите день или занятие:");
                 userProperties.incState();
                 break;
@@ -113,9 +87,9 @@ public class TerfitBot extends TelegramLongPollingBot{
                 HtmlParser parser = new HtmlParser(clubsHolder.getClub(userProperties.getClub()));
                 try {
                     Collection<Event> classes;
-                    if(text.equals("Сегодня")){
+                    if(text.equals(TODAY)){
                         classes = parser.today();
-                    } else if(text.equals("Завтра")){
+                    } else if(text.equals(TOMORROW)){
                         classes = parser.tomorrow();
                     } else {
                         classes = ImmutableList.of();
@@ -132,25 +106,11 @@ public class TerfitBot extends TelegramLongPollingBot{
                     });
 
                     if(userProperties.getRemember() != Remember.YES){
-                        sendMessage.setReplyMarkup(rkm);
-                        rkm.setKeyboard(Arrays.stream(clubsHolder.clubsString())
-                                .map(s -> {
-                                    KeyboardRow keyboardRow = new KeyboardRow();
-                                    keyboardRow.add(new KeyboardButton(s));
-                                    return keyboardRow;
-                                }).collect(Collectors.toList()));
+                        sendMessage.setReplyMarkup(keyboards.get(CLUBS));
                         sendMessage.setText("Выберите клуб:");
                         userProperties.setState(2);
                     } else {
-                        rkm.setKeyboard(Arrays.asList(new KeyboardRow() {{
-                                                          add(new KeyboardButton("Сегодня"));
-                                                          add(new KeyboardButton("Завтра"));
-                                                      }},
-                                        new KeyboardRow() {{
-                                            add(new KeyboardButton("Сменить клуб"));
-                                        }})
-                        );
-                        sendMessage.setReplyMarkup(rkm);
+                        sendMessage.setReplyMarkup(keyboards.get(DAYS_CLASSES_CHANGE_CLUB));
                         sendMessage.setText("Выберите действие:");
                     }
                 } catch (IOException e) {

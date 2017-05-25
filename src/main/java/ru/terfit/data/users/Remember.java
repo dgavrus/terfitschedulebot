@@ -1,4 +1,4 @@
-package data.users;
+package ru.terfit.data.users;
 
 public enum Remember {
     YES("Запомнить"),

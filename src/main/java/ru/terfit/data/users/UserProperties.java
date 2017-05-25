@@ -1,10 +1,6 @@
-package data.users;
-
-import com.sun.org.apache.regexp.internal.RE;
+package ru.terfit.data.users;
 
 public class UserProperties {
-
-
 
     private String club;
     private Remember remember;

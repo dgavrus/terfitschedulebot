@@ -1,4 +1,4 @@
-package data;
+package ru.terfit.data;
 
 import java.util.Optional;
 

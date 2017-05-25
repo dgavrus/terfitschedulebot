@@ -2,10 +2,7 @@ package ru.terfit;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.stereotype.Component;
-import ru.terfit.data.ClubsHolder;
-import ru.terfit.data.Constants;
-import ru.terfit.data.Event;
-import ru.terfit.data.HtmlParser;
+import ru.terfit.data.*;
 import ru.terfit.data.users.Keyboards;
 import ru.terfit.data.users.Remember;
 import ru.terfit.data.users.UserProperties;
@@ -22,6 +19,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static ru.terfit.data.Constants.*;
+import static ru.terfit.data.State.*;
 import static ru.terfit.data.users.Keyboards.*;
 
 
@@ -47,10 +45,10 @@ public class TerfitBot extends TelegramLongPollingBot {
         Message message = update.getMessage();
         String text = message.getText();
         if(text.equals(CHANGE_CLUB)){
-            userProperties.setState(1);
+            userProperties.setState(CHOOSE_CLUB);
             userProperties.setRemember(Remember.NOT_NOW);
         }
-        int state = userProperties.getState();
+        State state = userProperties.getState();
 
         SendMessage sendMessage = new SendMessage();
 
@@ -60,30 +58,30 @@ public class TerfitBot extends TelegramLongPollingBot {
         rkm.setOneTimeKeyboard(true);
 
         switch (state){
-            case 0:
-            case 1:
+            case START:
+            case CHOOSE_CLUB:
                 sendMessage.setReplyMarkup(keyboards.get(CLUBS));
                 sendMessage.setText("Выберите клуб:");
-                userProperties.setState(userProperties.getRemember() != Remember.YES ? 2 : 4);
+                userProperties.setState(userProperties.getRemember() != Remember.YES ? CHOOSE_REMEMBER : CHOOSE_DAY_CLASS);
                 break;
-            case 2:
+            case CHOOSE_REMEMBER:
                 userProperties.setClub(text);
                 sendMessage.setReplyMarkup(keyboards.get(REMEMBER));
                 sendMessage.setText("Запомнить выбор?");
                 userProperties.incState();
                 break;
-            case 3:
+            case SET_REMEMBER:
                 userProperties.setRemember(Arrays.stream(Remember.values())
                         .filter(r -> r.getString().equals(text))
                         .findFirst()
                         .orElse(Remember.NOT_NOW));
                 userProperties.incState();
-            case 4:
+            case CHOOSE_DAY_CLASS:
                 sendMessage.setReplyMarkup(keyboards.get(DAYS_CLASSES));
                 sendMessage.setText("Выберите день или занятие:");
                 userProperties.incState();
                 break;
-            case 5:
+            case GET_SCHEDULE:
                 HtmlParser parser = new HtmlParser(clubsHolder.getClub(userProperties.getClub()));
                 try {
                     Collection<Event> classes;
@@ -108,7 +106,7 @@ public class TerfitBot extends TelegramLongPollingBot {
                     if(userProperties.getRemember() != Remember.YES){
                         sendMessage.setReplyMarkup(keyboards.get(CLUBS));
                         sendMessage.setText("Выберите клуб:");
-                        userProperties.setState(2);
+                        userProperties.setState(CHOOSE_REMEMBER);
                     } else {
                         sendMessage.setReplyMarkup(keyboards.get(DAYS_CLASSES_CHANGE_CLUB));
                         sendMessage.setText("Выберите действие:");

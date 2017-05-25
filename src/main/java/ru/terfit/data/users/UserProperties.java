@@ -1,10 +1,14 @@
 package ru.terfit.data.users;
 
+import ru.terfit.data.State;
+
+import static ru.terfit.data.State.*;
+
 public class UserProperties {
 
     private String club;
     private Remember remember;
-    private int state = 0;
+    private State state = START;
 
     public UserProperties(){
         this(null, Remember.NOT_NOW);
@@ -17,7 +21,7 @@ public class UserProperties {
     public UserProperties(String club, Remember remember){
         this.club = club;
         this.remember = remember;
-        this.state = 0;
+        this.state = START;
     }
 
     public String getClub() {
@@ -36,15 +40,18 @@ public class UserProperties {
         this.remember = remember;
     }
 
-    public int getState(){
+    public State getState(){
         return state;
     }
 
-    public int incState(){
-        return ++state;
+    public State incState(){
+        state = state.ordinal() < State.values().length - 1
+                ? State.values()[state.ordinal() + 1] :
+                state;
+        return state;
     }
 
-    public void setState(int state){
+    public void setState(State state){
         this.state = state;
     }
 }

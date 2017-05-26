@@ -3,6 +3,7 @@ package ru.terfit.data;
 import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Map;
 
 @Component
@@ -26,8 +27,8 @@ public class ClubsHolder {
                 .put("Сходненская", "skhodnenskaya").build();
     }
 
-    public String[] clubsString(){
-        return clubs.keySet().toArray(new String[clubs.size()]);
+    public Collection<String> clubsString(){
+        return clubs.keySet();
     }
 
     public String getClub(String clubString){

@@ -35,4 +35,8 @@ public class ClubsHolder {
         return clubs.get(clubString);
     }
 
+    public boolean hasClub(String clubString){
+        return clubs.containsKey(clubString);
+    }
+
 }

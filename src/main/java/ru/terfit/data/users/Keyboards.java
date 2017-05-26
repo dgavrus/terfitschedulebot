@@ -85,4 +85,10 @@ public class Keyboards {
         return rkm;
     }
 
+    public ReplyKeyboardMarkup addRow(ReplyKeyboardMarkup keyboard, KeyboardRow row){
+        List<KeyboardRow> rows = keyboard.getKeyboard();
+        rows.add(row);
+        return keyboard;
+    }
+
 }

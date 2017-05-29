@@ -6,16 +6,14 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.time.LocalTime;
 import java.time.MonthDay;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.terfit.data.Utils.*;
+import static ru.terfit.data.Utils.DTF;
 
 public class HtmlParser {
 

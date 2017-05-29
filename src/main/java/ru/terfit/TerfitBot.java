@@ -1,7 +1,6 @@
 package ru.terfit;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Key;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
@@ -10,25 +9,27 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import ru.terfit.data.*;
+import ru.terfit.data.ClubsHolder;
+import ru.terfit.data.Event;
+import ru.terfit.data.ScheduleCache;
+import ru.terfit.data.State;
 import ru.terfit.data.users.Keyboards;
 import ru.terfit.data.users.Remember;
 import ru.terfit.data.users.UserProperties;
 import ru.terfit.data.users.UsersHolder;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.time.MonthDay;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ru.terfit.data.Constants.*;
 import static ru.terfit.data.State.*;
 import static ru.terfit.data.Utils.DTF;
-import static ru.terfit.data.users.Keyboards.*;
+import static ru.terfit.data.users.Keyboards.CLUBS;
+import static ru.terfit.data.users.Keyboards.REMEMBER;
 
 
 @Component

@@ -24,7 +24,12 @@ public class ClubsHolder {
                 .put("Новокосино", "novokosino")
                 .put("Печатники", "pechatniki")
                 .put("Пражская", "prazhskaya")
-                .put("Сходненская", "skhodnenskaya").build();
+                .put("Сходненская", "skhodnenskaya")
+                /*.put("Люблино", "lyublino")
+                .put("Королев", "korolev")
+                .put("Куркино", "kurkino")
+                .put("Ховрино", "hovrino")*/
+                .build();
     }
 
     public Collection<String> clubsString(){

@@ -1,20 +1,19 @@
 package ru.terfit.data;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.springframework.context.annotation.DependsOn;
+import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import java.io.IOError;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.MonthDay;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -61,6 +60,9 @@ public class ScheduleCache {
     public Map<MonthDay, List<Event>> forClub(String club){
         try {
             Map<MonthDay, List<Event>> schedule = cache.get(club);
+            if(schedule.isEmpty()){
+                return ImmutableMap.of();
+            }
             if(MonthDay.now().isAfter(schedule.keySet().iterator().next())){
                 cache.refresh(club);
             }

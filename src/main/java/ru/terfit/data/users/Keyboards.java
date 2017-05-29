@@ -1,11 +1,11 @@
 package ru.terfit.data.users;
 
 import com.google.common.collect.ImmutableMap;
-import ru.terfit.data.ClubsHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
+import ru.terfit.data.ClubsHolder;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -66,6 +66,12 @@ public class Keyboards {
     };
 
     public ReplyKeyboardMarkup makeKeyboard(Collection<String> buttons, int rows){
+        ReplyKeyboardMarkup rkm = new ReplyKeyboardMarkup();
+        rkm.setResizeKeyboard(true);
+        rkm.setOneTimeKeyboard(true);
+        if(buttons.isEmpty()){
+            return rkm;
+        }
         int buttonsPerRow = buttons.size() / rows;
         int mod = buttons.size() % rows;
         List<KeyboardRow> keyboarsRows = IntStream.range(0, rows).mapToObj(i -> new KeyboardRow()).collect(Collectors.toList());
@@ -78,10 +84,7 @@ public class Keyboards {
                 kr.add(buttonsIterator.next());
             }
         }
-        ReplyKeyboardMarkup rkm = new ReplyKeyboardMarkup();
         rkm.setKeyboard(keyboarsRows);
-        rkm.setResizeKeyboard(true);
-        rkm.setOneTimeKeyboard(true);
         return rkm;
     }
 

@@ -5,7 +5,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import ru.terfit.data.State;
 
-import static ru.terfit.data.State.*;
+import static ru.terfit.data.State.START;
 
 @DatabaseTable(tableName = "users")
 public class UserProperties {
@@ -69,5 +69,36 @@ public class UserProperties {
         this.state = state;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        UserProperties that = (UserProperties) o;
+
+        if (!id.equals(that.id)) return false;
+        if (club != null ? !club.equals(that.club) : that.club != null) return false;
+        if (remember != that.remember) return false;
+        return state == that.state;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + (club != null ? club.hashCode() : 0);
+        result = 31 * result + remember.hashCode();
+        result = 31 * result + state.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(id).append(',')
+                .append(club).append(',')
+                .append(remember).append(',')
+                .append(state);
+        return sb.toString();
+    }
 }

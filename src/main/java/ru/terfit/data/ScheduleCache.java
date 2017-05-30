@@ -4,6 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -26,6 +28,8 @@ import static ru.terfit.data.Utils.DTF;
 @Repository
 public class ScheduleCache {
 
+    private static Logger logger = LogManager.getLogger();
+
     @Inject
     private ClubsHolder clubsHolder;
 
@@ -38,6 +42,7 @@ public class ScheduleCache {
             try {
                 cache.get(c);
             } catch (ExecutionException e) {
+                logger.error(e);
                 throw new RuntimeException(e);
             }
         });
@@ -52,6 +57,7 @@ public class ScheduleCache {
                         Map<MonthDay, List<Event>> map = new TreeMap<>();
                         HtmlParser parser = new HtmlParser(clubsHolder.getClub(club));
                         map.putAll(parser.all());
+                        logger.info("Schedule loaded for {}", clubsHolder.getClub(club));
                         return map;
                     }
                 });
@@ -69,6 +75,7 @@ public class ScheduleCache {
             return cache.get(club);
 
         } catch (ExecutionException e) {
+            logger.error("{} {}", club, e);
             throw new RuntimeException(e);
         }
     }

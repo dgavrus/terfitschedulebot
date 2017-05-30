@@ -1,6 +1,8 @@
 package ru.terfit;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
@@ -35,6 +37,8 @@ import static ru.terfit.data.users.Keyboards.REMEMBER;
 @Component
 public class TerfitBot extends TelegramLongPollingBot {
 
+    private static Logger logger = LogManager.getLogger();
+
     @Inject
     private UsersHolder usersHolder;
     @Inject
@@ -55,6 +59,7 @@ public class TerfitBot extends TelegramLongPollingBot {
         }
         Message message = update.getMessage();
         String text = message.getText();
+        logger.info("Message {} from {}", text, userProperties.toString());
         if(text.equals(CHANGE_CLUB)){
             userProperties.setState(CHOOSE_CLUB);
             userProperties.setRemember(Remember.NOT_NOW);
@@ -118,7 +123,7 @@ public class TerfitBot extends TelegramLongPollingBot {
                     try {
                         sendMessage(new SendMessage(update.getMessage().getChatId(), s.print()));
                     } catch (TelegramApiException e) {
-                        e.printStackTrace();
+                        logger.error("{} {} {}", text, userProperties.toString(), e);
                     }
                 });
 
@@ -139,7 +144,7 @@ public class TerfitBot extends TelegramLongPollingBot {
         try {
             sendMessage(sendMessage);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("{} {} {}", text, userProperties.toString(), e);;
         }
         usersHolder.updateUserProperties(userProperties.getId(), userProperties);
     }

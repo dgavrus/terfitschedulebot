@@ -1,5 +1,6 @@
 package ru.terfit.data;
 
+import com.google.common.collect.ImmutableMap;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,11 +19,17 @@ import static ru.terfit.data.Utils.DTF;
 public class HtmlParser {
 
     private static final String BASE_URL = "http://terfit.ru/schedule/";
-    private static final String SUFFIX = "/?ajax=Y&getContent=Y&AGE[]=32&COACH=0&NOPAY=1&PAGEN_1=1";
+    private static final String SUFFIX = "/?ajax=Y&getContent=Y&COACH=0&NOPAY=1&PAGEN_1=1";
     private final String URL;
 
+
+    private static final Map<String, String> FILTERS_MAP = ImmutableMap.<String, String>builder()
+            .put("18-40","AGE[]=32")
+            .put("41-55","AGE[]=109")
+            .put("55+","AGE[]=110").build();
+
     public HtmlParser(String club){
-        URL = BASE_URL + club + SUFFIX;
+        URL = BASE_URL + club + SUFFIX + String.join("&", FILTERS_MAP.values());
     }
 
     public Map<MonthDay, List<Event>> all() throws IOException {

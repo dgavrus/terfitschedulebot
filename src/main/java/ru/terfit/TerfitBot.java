@@ -15,16 +15,14 @@ import ru.terfit.data.ClubsHolder;
 import ru.terfit.data.Event;
 import ru.terfit.data.ScheduleCache;
 import ru.terfit.data.State;
-import ru.terfit.data.users.Keyboards;
-import ru.terfit.data.users.Remember;
-import ru.terfit.data.users.UserProperties;
-import ru.terfit.data.users.UsersHolder;
+import ru.terfit.data.users.*;
 
 import javax.inject.Inject;
 import java.time.MonthDay;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.terfit.data.Constants.*;
@@ -59,6 +57,13 @@ public class TerfitBot extends TelegramLongPollingBot {
         }
         Message message = update.getMessage();
         String text = message.getText();
+        if(Put.getPut().getId() == id && text.toLowerCase().contains("привет")){
+            try {
+                sendMessage(new SendMessage(message.getChatId(), "Привет, Пут"));
+            } catch (TelegramApiException e) {
+                logger.error(e);
+            }
+        }
         logger.info("Message {} from {}", text, userProperties.toString());
         if(text.equals(CHANGE_CLUB)){
             userProperties.setState(CHOOSE_CLUB);
@@ -107,7 +112,9 @@ public class TerfitBot extends TelegramLongPollingBot {
                         .map(md -> md.format(DTF))
                         .collect(Collectors.toList());
                 if(text.equals(TODAY)){
-                    classes = scheduleCache.today(userProperties.getClub());
+                    classes = Optional.of(scheduleCache.today(userProperties.getClub()))
+                        .filter(l -> !l.isEmpty())
+                            .orElse(ImmutableList.of(Event.EMPTY_DAY));
                 } else if(text.equals(TOMORROW)){
                     classes = scheduleCache.tomorrow(userProperties.getClub());
                 } else {

@@ -2,7 +2,7 @@ package ru.terfit.data;
 
 import java.util.Optional;
 
-import static java.lang.System.*;
+import static java.lang.System.lineSeparator;
 
 public class Event {
 
@@ -36,13 +36,15 @@ public class Event {
 
     public String print(){
         StringBuilder sb = new StringBuilder();
-        sb.append(name).append(lineSeparator());
-        sb.append(time).append(lineSeparator());
-        sb.append(coach).append(lineSeparator());
-        sb.append(room).append(Optional.of(room)
+        if(name != null) sb.append(name).append(lineSeparator());
+        if(time != null) sb.append(time).append(lineSeparator());
+        if(coach != null) sb.append(coach).append(lineSeparator());
+        if(room != null) sb.append(room).append(Optional.of(room)
                                     .filter(String::isEmpty)
                                     .map(s -> "")
                                     .orElse(lineSeparator()));
         return sb.toString();
     }
+
+    public static final Event EMPTY_DAY = new Event(null, "Сегодня уже ничего не будет", null, null);
 }

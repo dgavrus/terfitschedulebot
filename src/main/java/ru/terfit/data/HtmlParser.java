@@ -19,7 +19,7 @@ import static ru.terfit.data.Utils.DTF;
 public class HtmlParser {
 
     private static final String BASE_URL = "http://terfit.ru/schedule/";
-    private static final String SUFFIX = "/?ajax=Y&getContent=Y&COACH=0&NOPAY=1&PAGEN_1=1";
+    private static final String SUFFIX = "/?ajax=Y&getContent=Y&COACH=0&NOPAY=1&PAGEN_1=1&";
     private final String URL;
 
 

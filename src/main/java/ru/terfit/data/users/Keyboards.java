@@ -63,7 +63,7 @@ public class Keyboards {
 
     public ReplyKeyboardMarkup get(String keyboard){
         return keyboards.get(keyboard);
-    };
+    }
 
     public ReplyKeyboardMarkup makeKeyboard(Collection<String> buttons, int rows){
         ReplyKeyboardMarkup rkm = new ReplyKeyboardMarkup();

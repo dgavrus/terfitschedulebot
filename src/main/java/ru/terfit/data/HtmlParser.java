@@ -8,10 +8,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.time.MonthDay;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ru.terfit.data.Utils.DTF;
@@ -47,18 +44,17 @@ public class HtmlParser {
                 dayTitles.remove(i);
             }
         }
-        Collection<List<Element>> daysEvents = day.stream().map(d -> d.select(".scp-tile").stream().collect(Collectors.toList())).collect(Collectors.toList());
+        Collection<List<Element>> daysEvents = day.stream().map(d -> new ArrayList<>(d.select(".scp-tile"))).collect(Collectors.toList());
         Iterator<MonthDay> dayTitlesIterator = dayTitles.iterator();
-        Map<MonthDay, List<Event>> events = daysEvents.stream()
+        return daysEvents.stream()
                 .map(d -> d.stream()
                         .map(this::parseEvent)
                         .collect(Collectors.toList()))
                 .collect(Collectors.toMap(e -> dayTitlesIterator.next(), e -> e));
-        return events;
     }
 
     private Event parseEvent(Element scpTile){
-        Elements elements = scpTile.select("span:not(span > span), a");
+        Elements elements = scpTile.select("span:not(span > span), a:not(.scp-tile__mobile-link)");
         List<String> eventParams = elements.stream().map(Element::text).collect(Collectors.toList());
         while (eventParams.size() < 4) eventParams.add("");
         return new Event(eventParams.get(0), eventParams.get(1), eventParams.get(2), eventParams.get(3));

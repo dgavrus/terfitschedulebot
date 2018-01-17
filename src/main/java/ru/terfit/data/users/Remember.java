@@ -14,4 +14,4 @@ public enum Remember {
     public String getString(){
         return remember;
     }
-};
+}

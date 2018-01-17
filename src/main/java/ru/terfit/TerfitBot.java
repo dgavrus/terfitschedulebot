@@ -151,7 +151,7 @@ public class TerfitBot extends TelegramLongPollingBot {
         try {
             sendMessage(sendMessage);
         } catch (TelegramApiException e) {
-            logger.error("{} {} {}", text, userProperties.toString(), e);;
+            logger.error("{} {} {}", text, userProperties.toString(), e);
         }
         usersHolder.updateUserProperties(userProperties.getId(), userProperties);
     }
